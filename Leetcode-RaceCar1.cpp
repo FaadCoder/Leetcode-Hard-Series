@@ -41,6 +41,17 @@ public:
 
 class Solution {
     int target;
+    
+    bool isPositionNotFarFromTarget(int position,int target)
+    {
+        return abs(target - position) < target;
+    }
+    
+    bool isValidInstruction(int position,unordered_set<string> &visSet,string &key,int target)
+    {
+        return !visSet.count(key) and isPositionNotFarFromTarget(position,target);
+    }
+    
     int getMinimumNumberOfInstructions()
     {
         int minimumNumberOfInstructions = 0;
@@ -49,6 +60,15 @@ class Solution {
         string key = to_string(0) + "," + to_string(1);
         visSet.insert(key);
         bfsQueue.push(CarAttributes(0,1));
+        
+        // lambda function to deal with repititive work.
+        auto moveToNextPos = [&](int nextPosition,int nextSpeed,CarAttributes &carAttribute,string &key){
+            visSet.insert(key);
+            carAttribute.setPosition(nextPosition);
+            carAttribute.setSpeed(nextSpeed);
+            bfsQueue.push(carAttribute);
+        };
+        
         while(!bfsQueue.empty())
         {
             int size = (int)bfsQueue.size();
@@ -62,24 +82,22 @@ class Solution {
                 if(currPos == target)
                 return minimumNumberOfInstructions;
 
-                // "A" 
+                // Explore option : "A" 
                 int nextPos = currPos + currSpd;
                 int nextSpd = currSpd * 2;
                 key = to_string(nextPos) + "," + to_string(nextSpd);
-                if(!visSet.count(key) and abs(target - nextPos) < target)
+                if(isValidInstruction(nextPos,visSet,key,target))
                 {
-                    visSet.insert(key);
-                    bfsQueue.push(CarAttributes(nextPos,nextSpd));
+                    moveToNextPos(nextPos,nextSpd,front,key);
                 }
                 
-                // "R"
+                // Explore option : "R"
                 nextPos = currPos;
                 nextSpd = currSpd < 0 ? 1 : -1;
                 key = to_string(nextPos) + "," + to_string(nextSpd);
-                if(!visSet.count(key) and abs(target - nextPos) < target)
+                if(isValidInstruction(nextPos,visSet,key,target))
                 {
-                    visSet.insert(key);
-                    bfsQueue.push(CarAttributes(nextPos,nextSpd));
+                     moveToNextPos(nextPos,nextSpd,front,key);
                 }
 
             }
