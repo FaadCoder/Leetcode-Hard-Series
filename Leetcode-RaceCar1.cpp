@@ -7,94 +7,91 @@ Solution Explanation : https://youtu.be/_Fm9JZDLYHg
 
 class CarAttributes{
 private:
-    int speed,position;
+    int position,speed;
+
 public:
-    CarAttributes(int speed,int position)
+    CarAttributes(int position,int speed)
     {
-        this->speed = speed;
         this->position = position;
-    }
-    
-    void setSpeed(int speed)
-    {
         this->speed = speed;
     }
-    
+
     void setPosition(int position)
     {
         this->position = position;
     }
-    
+
+    void setSpeed(int speed)
+    {
+        this->speed = speed;
+    }
+
+    int getPosition()
+    {
+        return position;
+    }
+
     int getSpeed()
     {
         return speed;
     }
     
-    int getPosition()
-    {
-        return position;
-    }
 };
 
+
 class Solution {
-    
-    int getShortestLengthOfSequence(int target)
+    int target;
+    int getMinimumNumberOfInstructions()
     {
-        unordered_map<int,unordered_map<int,int>> speedAndPositionVisitedMap;
-        queue<CarAttributes> q;
-        q.push(CarAttributes(1,0));
-        speedAndPositionVisitedMap[0][1] = 1;
-        int level = 0;
-        
-        while(!q.empty())
+        int minimumNumberOfInstructions = 0;
+        queue<CarAttributes> bfsQueue;
+        unordered_set<string> visSet;
+        string key = to_string(0) + "," + to_string(1);
+        visSet.insert(key);
+        bfsQueue.push(CarAttributes(0,1));
+        while(!bfsQueue.empty())
         {
-            int qSize = q.size();
-            while(qSize--)
+            int size = (int)bfsQueue.size();
+            while(size--)
             {
-                CarAttributes qFront = q.front();
-                q.pop();
-                int currentPosition = qFront.getPosition();
-                int currentSpeed = qFront.getSpeed();
-                if(currentPosition == target)
+                CarAttributes front = bfsQueue.front();
+                bfsQueue.pop();
+                int currPos = front.getPosition();
+                int currSpd = front.getSpeed();
+
+                if(currPos == target)
+                return minimumNumberOfInstructions;
+
+                // "A" 
+                int nextPos = currPos + currSpd;
+                int nextSpd = currSpd * 2;
+                key = to_string(nextPos) + "," + to_string(nextSpd);
+                if(!visSet.count(key) and abs(target - nextPos) < target)
                 {
-                    return level;
+                    visSet.insert(key);
+                    bfsQueue.push(CarAttributes(nextPos,nextSpd));
                 }
-                // Choice "A"
-                int nextPosition = currentPosition + currentSpeed;
-                int nextSpeed = currentSpeed * 2;
                 
-                if(!speedAndPositionVisitedMap[nextPosition][nextSpeed])
+                // "R"
+                nextPos = currPos;
+                nextSpd = currSpd < 0 ? 1 : -1;
+                key = to_string(nextPos) + "," + to_string(nextSpd);
+                if(!visSet.count(key) and abs(target - nextPos) < target)
                 {
-                    if(abs(target - nextPosition) < target)
-                    {
-                        speedAndPositionVisitedMap[nextPosition][nextSpeed] = 1;
-                        q.push(CarAttributes(nextSpeed,nextPosition));
-                    }
+                    visSet.insert(key);
+                    bfsQueue.push(CarAttributes(nextPos,nextSpd));
                 }
-                 
-                // Choice "R"
-                nextPosition = currentPosition;
-                nextSpeed = currentSpeed < 0 ? 1 : -1;
-                
-                if(!speedAndPositionVisitedMap[nextPosition][nextSpeed])
-                {
-                    if(abs(target - nextPosition) < target)
-                    {
-                        speedAndPositionVisitedMap[nextPosition][nextSpeed] = 1;
-                        q.push(CarAttributes(nextSpeed,nextPosition));
-                    }
-                }   
-                
+
             }
-            level++;
+            minimumNumberOfInstructions += 1;
         }
-        
         return -1;
     }
-    
+
 public:
     int racecar(int target) 
     {
-        return getShortestLengthOfSequence(target);
+        this->target = target;
+        return getMinimumNumberOfInstructions();
     }
 };
